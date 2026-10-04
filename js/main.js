@@ -91,7 +91,7 @@ form.addEventListener("submit", (e) => {
     const carreraInput = document.getElementById("carrera").value;
     const promedioInput = parseFloat(document.getElementById("promedio").value);
   
-    const nuevoEstudiante = new Estudiante(nombreInput, apellidoInput, promedioInput, carreraInput);
+    const nuevoEstudiante = new Estudiante(nombreInput, apellidoInput, promedioInput, carreraInput);    
     estudiantes.push(nuevoEstudiante); 
     
     guardarEnStorage();
@@ -129,18 +129,28 @@ function mostrarEstudiantes(arrayEstudiantes) {
 
         const btnSeleccionar = card.querySelector(".btn-seleccionar");
         const btnEliminarBase = card.querySelector(".btn-eliminar-base");
-        const feedbackMensaje = card.querySelector(".feedback-mensaje");
 
         // Evento: Seleccionar estudiante para la lista
         btnSeleccionar.addEventListener('click', () => {
             const estudianteAprobado = estudiante.consultar();
             
-            // 🔹 OPERADOR MODERNO (Ternario)
-            feedbackMensaje.textContent = estudianteAprobado ? `✅ Seleccionado con éxito` : `⚠️ Seleccionado (No aprobado)`;
-            feedbackMensaje.style.color = estudianteAprobado ? "#2f855a" : "#dd6b20";
-            //TEMPORIZADOR ****
-            setTimeout(() => { feedbackMensaje.textContent = ""; }, 2500);
-
+            if (estudianteAprobado) {
+        Swal.fire({
+          title: '¡Estudiante Seleccionado!',
+          text: `${nombre} ${apellido} ha sido agregado con éxito.`,
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      } else {
+        Swal.fire({
+          title: 'Estudiante Seleccionado (No aprobado)',
+          text: `${nombre} ${apellido} tiene un promedio menor a 7.`,
+          icon: 'warning',
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#dd6b20'
+        });
+      }
             alumnos.push({ nombre, apellido, promedio });
             guardarEnStorage();
             renderizarAlumnos();
@@ -184,3 +194,49 @@ inputBuscar.addEventListener("input", () => {
 // Inicialización
 mostrarEstudiantes(estudiantes);
 renderizarAlumnos();
+
+Swal.fire({
+  title: 'Bienvenido',
+  text: 'Dale Click en continuar',
+  icon: 'Continuar',
+  confirmButtonText: 'Continuar'
+})  
+
+const aplicación = document.querySelector('.container');
+const urlApi = 'https://jsonplaceholder.typicode.com/photos';
+
+async function getData() {
+  try {
+    const response = await fetch(urlApi);
+    const data = await response.json();
+    
+    // Llamamos a la función que pintará los datos en el HTML
+    mostrarFotos(data);
+    
+  } catch (error) {
+    console.error('Error encontrado:', error);
+    aplicación.innerHTML = `<p>Hubo un error al cargar las fotos.</p>`;
+  }
+}
+
+function mostrarFotos(fotos) {
+
+  aplicación.innerHTML = '';
+  // Se limita a las primeras 10 fotos para no saturar la página 
+  const primerasFotos = fotos.slice(0, 10);
+
+  primerasFotos.forEach(foto => {
+    //  Creamos el elemento contenedor para la tarjeta
+    const tarjeta = document.createElement('div');
+    tarjeta.classList.add('card');
+
+    tarjeta.innerHTML = `
+      <img src="${foto.thumbnailUrl}" alt="${foto.title}">
+      <h3>${foto.title}</h3>
+    `;
+
+    aplicación.appendChild(tarjeta);
+  });
+}
+
+getData();
